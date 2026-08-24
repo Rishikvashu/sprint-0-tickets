@@ -1,92 +1,162 @@
-# Test Documentation
+# 🐍 Python Installation
 
-This directory contains the test documentation and test assets for the Python Installer project.
+> **Automated Python installation utility for Ubuntu/Linux**
+>
+> Supports **APT**, **source tarball**, and **automatic method selection** with validation, SHA256 verification, logging, cleanup, and automated tests.
 
-## Test Structure
+---
+
+## 🧭 Navigation
+
+- [✨ Features](#-features)
+- [🏗️ Project Structure](#️-project-structure)
+- [⚙️ Requirements](#️-requirements)
+- [🚀 Quick Start](#-quick-start)
+- [📦 Installation Methods](#-installation-methods)
+- [🔐 SHA256 Verification](#-sha256-verification)
+- [🔄 Upgrade](#-upgrade)
+- [♻️ Idempotency](#️-idempotency)
+- [📝 Logging](#-logging)
+- [🧹 Cleanup](#-cleanup)
+- [🧪 Testing](#-testing)
+- [🛠️ Troubleshooting](#️-troubleshooting)
+- [🔒 Security](#-security)
+- [📚 Documentation](#-documentation)
+
+---
+
+## ✨ Features
+
+| Feature | Status |
+|---|:---:|
+| 🐍 Python version validation | ✅ |
+| 📦 APT/package installation | ✅ |
+| 📦 Source tarball installation | ✅ |
+| 🤖 Automatic package/tarball selection | ✅ |
+| 🔐 SHA256 checksum verification | ✅ |
+| ♻️ Existing-version detection | ✅ |
+| 🔄 Upgrade handling | ✅ |
+| 🛡️ Idempotent behavior | ✅ |
+| 🔧 Build dependency checking | ✅ |
+| 📝 Installation logging | ✅ |
+| 🧹 Temporary build cleanup | ✅ |
+| 🐞 Optional build-directory preservation | ✅ |
+| 🧪 Automated tests | ✅ |
+
+---
+
+## 🏗️ Project Structure
 
 ```text
-tests/
-├── README.md
-└── test-installations.sh
+python-installation/
+│
+├── 📄 README.md
+├── 🐍 python-installer.sh
+│
+├── 📁 docs/
+│   └── 📄 installation.md
+│
+└── 📁 tests/
+    ├── 🧪 test-installations.sh
+    └── 📄 README.md
 ```
 
-> Keep the test script and its documentation together inside the `tests/` directory.
+> 💡 **Scope:** Documentation inside this project is intentionally limited to the Python installation project. No repository-level README is required for this structure.
 
 ---
 
-## Test Objective
+## ⚙️ Requirements
 
-The purpose of the test suite is to verify that `python-installer.sh` behaves correctly for supported installation methods, validation, idempotency, logging, and runtime verification.
+### 🖥️ Tested Environment
 
-The tests are designed to validate the installer without unnecessarily reinstalling an already-installed Python version.
+```text
+Ubuntu 24.04 LTS
+```
+
+### 🔨 Tarball Build Tools
+
+The installer checks for:
+
+```text
+gcc
+make
+tar
+wget
+sha256sum
+```
+
+### 📚 Development Packages
+
+```text
+build-essential
+libssl-dev
+zlib1g-dev
+libbz2-dev
+libreadline-dev
+libsqlite3-dev
+libffi-dev
+liblzma-dev
+tk-dev
+uuid-dev
+```
 
 ---
 
-## Test Script
+## 🚀 Quick Start
 
-Run the test script from the project root:
-
-```bash
-./tests/test-installations.sh
-```
-
-If the script is not executable:
+### 1️⃣ Make scripts executable
 
 ```bash
+chmod +x python-installer.sh
 chmod +x tests/test-installations.sh
 ```
 
-Then:
-
-```bash
-./tests/test-installations.sh
-```
-
----
-
-## Test Cases
-
-| ID | Test Case | Expected Result |
-|---|---|---|
-| TC-01 | Shell syntax validation | Script syntax is valid |
-| TC-02 | Package method | Existing/available Python package is detected correctly |
-| TC-03 | Auto method with APT | APT is selected when package is available |
-| TC-04 | Tarball method with existing installation | Existing target version is detected and no unnecessary rebuild occurs |
-| TC-05 | Invalid Python version | Invalid version is rejected |
-| TC-06 | Invalid installation method | Unsupported method is rejected |
-| TC-07 | Help option | Usage information is displayed |
-| TC-08 | Logging | Installer log exists and contains execution entries |
-| TC-09 | Python runtime verification | Installed Python version is verified |
-
----
-
-## TC-01: Shell Syntax
-
-Command:
+### 2️⃣ Validate shell syntax
 
 ```bash
 bash -n python-installer.sh
 ```
 
-Expected:
+> ✅ No output means the Bash syntax check passed.
 
-```text
-No output
+### 3️⃣ Run the test suite
+
+```bash
+./tests/test-installations.sh
 ```
 
-A zero exit status means the Bash syntax is valid.
+### 4️⃣ Install Python with APT
+
+```bash
+./python-installer.sh \
+    --version 3.12 \
+    --method package
+```
+
+### 5️⃣ Install Python from source
+
+```bash
+./python-installer.sh \
+    --version 3.13.7 \
+    --method tarball \
+    --sha256 <SHA256_CHECKSUM>
+```
 
 ---
 
-## TC-02: Package Method
+## 📦 Installation Methods
 
-Command:
+### 📦 Method 1 — Package
+
+Use APT when the requested Python version is available.
 
 ```bash
-./python-installer.sh     --version 3.12     --method package
+./python-installer.sh \
+    --version 3.12 \
+    --method package
 ```
 
-Expected behavior:
+The installer detects an existing installation and avoids unnecessary reinstallation.
 
 ```text
 Package python3.12 is available in APT.
@@ -95,168 +165,101 @@ Installed version: 3.12.3
 Nothing to install.
 ```
 
-The test verifies that the package method detects an existing installation and avoids unnecessary reinstallation.
-
 ---
 
-## TC-03: Auto Method
+### 📦 Method 2 — Tarball
 
-Command:
-
-```bash
-./python-installer.sh     --version 3.12     --method auto
-```
-
-Expected behavior:
-
-```text
-APT package found.
-Using package manager.
-```
-
-The test verifies that `auto` selects APT when the requested package is available.
-
----
-
-## TC-04: Tarball Existing Installation
-
-Command:
+Use the official Python source tarball when a package is unavailable or a source installation is required.
 
 ```bash
-./python-installer.sh     --version 3.13.7     --method tarball     --sha256 6c9d80839cfa20024f34d9a6dd31ae2a9cd97ff5e980e969209746037a5153b2
+./python-installer.sh \
+    --version 3.13.7 \
+    --method tarball \
+    --sha256 <SHA256_CHECKSUM>
 ```
 
-Expected behavior:
+#### 🔄 Installation flow
 
 ```text
-Existing Python found: 3.13.7
-Version comparison: SAME
-Python 3.13.7 is already installed.
-Nothing to install.
-```
-
-This test verifies idempotent behavior for an already-installed tarball version.
-
----
-
-## TC-05: Invalid Python Version
-
-Command:
-
-```bash
-./python-installer.sh     --version abc     --method package
-```
-
-Expected behavior:
-
-```text
-ERROR: Invalid Python version
-```
-
-The command must return a non-zero exit status.
-
----
-
-## TC-06: Invalid Installation Method
-
-Command:
-
-```bash
-./python-installer.sh     --version 3.12     --method xyz
-```
-
-Expected behavior:
-
-```text
-ERROR: Unsupported method 'xyz'.
-```
-
-The command must return a non-zero exit status.
-
----
-
-## TC-07: Help
-
-Command:
-
-```bash
-./python-installer.sh --help
-```
-
-Expected output should contain the installer usage information, including:
-
-```text
-Python Installer
---version
---method
+          📝 Validate
+              │
+              ▼
+      🔎 Existing version?
+              │
+              ▼
+       🔐 Validate SHA256
+              │
+              ▼
+       🔧 Check dependencies
+              │
+              ▼
+          ⬇️ Download
+              │
+              ▼
+       🔐 Verify checksum
+              │
+              ▼
+          📦 Extract
+              │
+              ▼
+        ⚙️ Configure
+              │
+              ▼
+          🔨 Build
+              │
+              ▼
+          📥 Install
+              │
+              ▼
+          ✅ Verify
+              │
+              ▼
+          🧹 Cleanup
 ```
 
 ---
 
-## TC-08: Logging
+### 🤖 Method 3 — Auto
 
-The installer writes execution logs to:
-
-```text
-logs/python-installer.log
-```
-
-Verify:
+The `auto` method chooses the installation mechanism:
 
 ```bash
-cat logs/python-installer.log
+./python-installer.sh \
+    --version 3.13.7 \
+    --method auto \
+    --sha256 <SHA256_CHECKSUM>
 ```
 
-The log should contain entries such as:
+Decision logic:
 
 ```text
-Python installer started
-Target version
-Method
-Python installer finished successfully
+             🐍 Requested version
+                     │
+                     ▼
+           📦 APT package available?
+                ╱             ╲
+              YES              NO
+               │                │
+               ▼                ▼
+            📦 APT          📦 Tarball
 ```
 
 ---
 
-## TC-09: Runtime Verification
+## 🔐 SHA256 Verification
 
-For the source-installed Python version:
+Tarball installation requires a SHA256 checksum.
 
-```bash
-/usr/local/bin/python3.13 --version
-```
-
-Expected:
-
-```text
-Python 3.13.7
-```
-
-Additional verification:
-
-### SSL
+Example:
 
 ```bash
-/usr/local/bin/python3.13 -c "import ssl; print('SSL:', ssl.OPENSSL_VERSION)"
+./python-installer.sh \
+    --version 3.13.7 \
+    --method tarball \
+    --sha256 6c9d80839cfa20024f34d9a6dd31ae2a9cd97ff5e980e969209746037a5153b2
 ```
 
-### SQLite
-
-```bash
-/usr/local/bin/python3.13 -c "import sqlite3; print('SQLite:', sqlite3.sqlite_version)"
-```
-
-### Core Modules
-
-```bash
-/usr/local/bin/python3.13 -c "import bz2, lzma, ctypes, readline; print('Core modules: OK')"
-```
-
----
-
-## SHA256 Verification
-
-The Python 3.13.7 source archive used during validation was checked with:
+Manual verification:
 
 ```bash
 echo "6c9d80839cfa20024f34d9a6dd31ae2a9cd97ff5e980e969209746037a5153b2  Python-3.13.7.tgz" | sha256sum -c -
@@ -268,13 +271,122 @@ Expected:
 Python-3.13.7.tgz: OK
 ```
 
-The installer must reject a tarball when its SHA256 checksum does not match the supplied checksum.
+> 🛑 A failed checksum must stop the tarball installation.
 
 ---
 
-## Test Execution Result
+## 🔄 Upgrade
 
-A successful test run should finish with:
+For an APT-managed Python version:
+
+```bash
+./python-installer.sh \
+    --version 3.12 \
+    --method package \
+    --upgrade
+```
+
+The `--upgrade` option targets the requested Python package. It does **not** perform a general system upgrade.
+
+---
+
+## ♻️ Idempotency
+
+The installer compares the requested version with the installed version.
+
+Possible states:
+
+```text
+SAME
+UPGRADE
+DOWNGRADE
+```
+
+For an already-installed target:
+
+```text
+Version comparison: SAME
+Python 3.13.7 is already installed.
+Nothing to install.
+```
+
+> 🛡️ This prevents unnecessary rebuilding or reinstalling.
+
+Downgrades are not supported.
+
+---
+
+## 📝 Logging
+
+Installer activity is recorded in:
+
+```text
+logs/python-installer.log
+```
+
+View logs:
+
+```bash
+cat logs/python-installer.log
+```
+
+Typical entries include:
+
+```text
+Target version
+Installation method
+Upgrade option
+Build retention option
+Package selection
+Version comparison
+Installation status
+```
+
+---
+
+## 🧹 Cleanup
+
+Tarball builds use:
+
+```text
+/tmp/python-build-<version>
+```
+
+Successful installations automatically remove the temporary build directory.
+
+For troubleshooting, preserve it with:
+
+```bash
+./python-installer.sh \
+    --version <version> \
+    --method tarball \
+    --sha256 <SHA256_CHECKSUM> \
+    --keep-build
+```
+
+---
+
+## 🧪 Testing
+
+Run the project test suite:
+
+```bash
+./tests/test-installations.sh
+```
+
+The suite validates:
+
+- 🔎 Shell syntax
+- 📦 Package method
+- 🤖 Auto method
+- 📦 Existing tarball installation
+- ❌ Invalid Python versions
+- ❌ Invalid methods
+- ❓ Help output
+- 📝 Logging
+- 🐍 Python runtime verification
+
+Expected result:
 
 ```text
 ========================================
@@ -286,46 +398,102 @@ FAILED: 0
 ALL TESTS PASSED
 ```
 
-### Acceptance Criteria
-
-The test suite is considered successful when:
-
-- [ ] All syntax checks pass
-- [ ] Package method behaves correctly
-- [ ] Auto method selects APT when available
-- [ ] Tarball method handles an existing installation correctly
-- [ ] Invalid versions are rejected
-- [ ] Invalid methods are rejected
-- [ ] Help output is available
-- [ ] Logs are generated
-- [ ] Installed Python runtime is verified
-- [ ] SHA256 verification succeeds for a valid archive
-- [ ] SHA256 mismatch is rejected
+👉 See [`tests/README.md`](tests/README.md) for the complete test documentation.
 
 ---
 
-## Test Environment
+## 🛠️ Troubleshooting
 
-The validation environment used for this project is:
+<details>
+<summary>📦 APT package is unavailable</summary>
+
+Use:
+
+```bash
+--method auto
+```
+
+or explicitly:
+
+```bash
+--method tarball
+```
+
+Tarball installation requires a valid SHA256 checksum.
+
+</details>
+
+<details>
+<summary>🔐 SHA256 verification failed</summary>
+
+Verify the downloaded archive and the expected checksum before continuing.
+
+Do not bypass checksum validation.
+
+</details>
+
+<details>
+<summary>🔧 Build dependency is missing</summary>
+
+The installer reports missing dependencies and provides an APT command that can be used to install them.
+
+</details>
+
+<details>
+<summary>♻️ Python is already installed</summary>
+
+This is expected behavior:
 
 ```text
-OS: Ubuntu 24.04 LTS
-Python system version: 3.12.3
-Source-installed Python: 3.13.7
+Version comparison: SAME
+Nothing to install.
 ```
+
+The installer avoids unnecessary work.
+
+</details>
 
 ---
 
-## Related Documentation
+## 🔒 Security
 
-Detailed installation documentation is available at:
+- 🔐 Always verify SHA256 checksums for source archives.
+- 🌐 Use a trusted Python source URL.
+- 🚫 Never commit passwords, tokens, API keys, or private SSH keys.
+- 📦 Avoid committing large source archives and temporary build files.
+- 📝 Review scripts before running commands that use `sudo`.
 
-```text
-docs/installation.md
-```
+---
 
-The main project overview is available at:
+## 📚 Documentation
 
-```text
-README.md
-```
+| Document | Purpose |
+|---|---|
+| 📄 [`README.md`](README.md) | Project overview and quick start |
+| 📘 [`docs/installation.md`](docs/installation.md) | Detailed installation and operational documentation |
+| 🧪 [`tests/README.md`](tests/README.md) | Test cases, commands, expected results, and acceptance criteria |
+
+---
+
+## ✅ Final Checklist
+
+- [ ] 🐍 `python-installer.sh` is executable
+- [ ] 🧪 `test-installations.sh` is executable
+- [ ] 🔎 Syntax check passes
+- [ ] 📦 Package method tested
+- [ ] 🤖 Auto method tested
+- [ ] 📦 Tarball behavior tested
+- [ ] 🔐 SHA256 verification tested
+- [ ] ❌ Invalid input handling tested
+- [ ] 📝 Logging verified
+- [ ] 🐍 Runtime verification completed
+- [ ] 🚫 No secrets committed
+- [ ] 🧹 Unnecessary build artifacts excluded
+
+---
+
+<p align="center">
+
+**🐍 Python Installation • Automated • Validated • Secure**
+
+</p>
