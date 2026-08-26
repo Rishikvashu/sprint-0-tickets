@@ -1,4 +1,4 @@
-# COMMON STACK | JQ | CI CHECK | JQ Documentation
+# COMMON STACK | JQ | JQ Documentation
 
 ---
 
@@ -480,7 +480,7 @@ The POC will cover:
 
 | **Name**           | **Email** |
 | ------------------ | --------- |
-| Vashishtha Prakash | <email>   |
+| Vashishtha Prakash | vashishtha123456789@gmail.com   |
 
 ---
 
